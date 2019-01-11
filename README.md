@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	
 	"github.com/devigned/tab"
 	_ "github.com/devigned/tab/opencensus" // use OpenCensus
@@ -41,7 +42,7 @@ func printHelloWorld(ctx context.Context) {
 	
 	// add attribute to span
 	span.AddAttributes(tab.StringAttribute("interesting", "value"))
-	println("Hello World!")
+	fmt.Println("Hello World!")
 	tab.For(ctx).Info("after println call")
 }
 
