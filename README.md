@@ -7,7 +7,7 @@ Why? Well, sometimes you want to let the consumer choose the tracing / logging i
 ### Installing the library
 
 ```
-go get -u github.com/devigned/tab
+go get -u github.com/devigned/tab/...
 ```
 
 If you need to install Go, follow [the official instructions](https://golang.org/dl/)
