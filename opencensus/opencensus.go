@@ -2,6 +2,7 @@ package opencensus
 
 import (
 	"context"
+	"encoding/base64"
 	"github.com/devigned/tab"
 	oct "go.opencensus.io/trace"
 	"go.opencensus.io/trace/propagation"
@@ -49,6 +50,15 @@ func (t *Trace) StartSpanWithRemoteParent(ctx context.Context, operationName str
 			ctx, span := oct.StartSpanWithRemoteParent(ctx, operationName, sc)
 			return ctx, &Span{span: span}
 		}
+
+		if strVal, ok := val.(string); ok {
+			if decoded, err := base64.StdEncoding.DecodeString(strVal); err != nil {
+				if sc, ok := propagation.FromBinary(decoded); ok {
+					ctx, span := oct.StartSpanWithRemoteParent(ctx, operationName, sc)
+					return ctx, &Span{span: span}
+				}
+			}
+		}
 	}
 
 	return t.StartSpan(ctx, operationName)
@@ -87,7 +97,9 @@ func (s *Span) Logger() tab.Logger {
 
 // Inject propagation key onto the carrier
 func (s *Span) Inject(carrier tab.Carrier) error {
-	carrier.Set(propagationKey, propagation.Binary(s.span.SpanContext()))
+	spanBin := propagation.Binary(s.span.SpanContext())
+	encodedSpan := base64.StdEncoding.EncodeToString(spanBin)
+	carrier.Set(propagationKey, encodedSpan)
 	return nil
 }
 
