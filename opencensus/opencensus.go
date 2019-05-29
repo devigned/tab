@@ -46,11 +46,15 @@ func (t *Trace) StartSpan(ctx context.Context, operationName string, opts ...int
 func (t *Trace) StartSpanWithRemoteParent(ctx context.Context, operationName string, carrier tab.Carrier, opts ...interface{}) (context.Context, tab.Spanner) {
 	keysValues := carrier.GetKeyValues()
 	if val, ok := keysValues[propagationKey]; ok {
-		if sc, ok := propagation.FromBinary(val.([]byte)); ok {
-			ctx, span := oct.StartSpanWithRemoteParent(ctx, operationName, sc)
-			return ctx, &Span{span: span}
+		// check if bin and extract
+		if bin, ok := val.([]byte); ok {
+			if sc, ok := propagation.FromBinary(bin); ok {
+				ctx, span := oct.StartSpanWithRemoteParent(ctx, operationName, sc)
+				return ctx, &Span{span: span}
+			}
 		}
 
+		// check if string and expect base64 encoded
 		if strVal, ok := val.(string); ok {
 			if decoded, err := base64.StdEncoding.DecodeString(strVal); err != nil {
 				if sc, ok := propagation.FromBinary(decoded); ok {
