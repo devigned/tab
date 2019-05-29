@@ -4,7 +4,9 @@ import (
 	"context"
 )
 
-var tracer Tracer
+var (
+	tracer Tracer = new(NoOpTracer)
+)
 
 // Register a Tracer instance
 func Register(t Tracer) {
@@ -101,10 +103,33 @@ type (
 		Span Spanner
 	}
 
+	// NoOpTracer is a Tracer implementation that does nothing, thus no op
+	NoOpTracer struct{}
+
 	noOpLogger struct{}
 
 	noOpSpanner struct{}
 )
+
+// StartSpan returns the input context and a no op Spanner
+func (nt *NoOpTracer) StartSpan(ctx context.Context, operationName string, opts ...interface{}) (context.Context, Spanner) {
+	return ctx, new(noOpSpanner)
+}
+
+// StartSpanWithRemoteParent returns the input context and a no op Spanner
+func (nt *NoOpTracer) StartSpanWithRemoteParent(ctx context.Context, operationName string, carrier Carrier, opts ...interface{}) (context.Context, Spanner) {
+	return ctx, new(noOpSpanner)
+}
+
+// FromContext returns a no op Spanner without regard to the input context
+func (nt *NoOpTracer) FromContext(ctx context.Context) Spanner {
+	return new(noOpSpanner)
+}
+
+// NewContext returns the parent context
+func (nt *NoOpTracer) NewContext(parent context.Context, span Spanner) context.Context {
+	return parent
+}
 
 // AddAttributes is a nop
 func (ns *noOpSpanner) AddAttributes(attributes ...Attribute) {}
@@ -114,7 +139,7 @@ func (ns *noOpSpanner) End() {}
 
 // Logger returns a nopLogger
 func (ns *noOpSpanner) Logger() Logger {
-	return noOpLogger{}
+	return new(noOpLogger)
 }
 
 // Inject is a nop
