@@ -56,7 +56,7 @@ func (t *Trace) StartSpanWithRemoteParent(ctx context.Context, operationName str
 
 		// check if string and expect base64 encoded
 		if strVal, ok := val.(string); ok {
-			if decoded, err := base64.StdEncoding.DecodeString(strVal); err != nil {
+			if decoded, err := base64.StdEncoding.DecodeString(strVal); err == nil {
 				if sc, ok := propagation.FromBinary(decoded); ok {
 					ctx, span := oct.StartSpanWithRemoteParent(ctx, operationName, sc)
 					return ctx, &Span{span: span}
