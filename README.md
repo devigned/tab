@@ -2,6 +2,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/devigned/tab)](https://goreportcard.com/report/github.com/devigned/tab)
 [![godoc](https://godoc.org/github.com/devigned/tab?status.svg)](https://godoc.org/github.com/devigned/tab)
 [![Build Status](https://travis-ci.org/devigned/tab.svg?branch=master)](https://travis-ci.org/devigned/tab)
+
 OpenTracing and OpenCensus abstraction for tracing and logging. 
 
 Why? Well, sometimes you want to let the consumer choose the tracing / logging implementation.
