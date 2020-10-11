@@ -85,7 +85,7 @@ func (s *Span) Logger() tab.Logger {
 
 // Inject span context into carrier
 func (s *Span) Inject(carrier tab.Carrier) error {
-	return opentracing.GlobalTracer().Inject(s.span.Context(), opentracing.TextMap, carrierAdapter{carrier: carrier})
+	return opentracing.GlobalTracer().Inject(s.span.Context(), opentracing.TextMap, &carrierAdapter{carrier: carrier})
 }
 
 // InternalSpan returns the real implementation of the Span
