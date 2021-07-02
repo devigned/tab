@@ -2,6 +2,7 @@ package opentracing
 
 import (
 	"context"
+
 	"github.com/devigned/tab"
 	"github.com/opentracing/opentracing-go"
 )
@@ -32,10 +33,14 @@ func (t *Trace) StartSpan(ctx context.Context, operationName string, opts ...int
 	return ctx, &Span{span: span}
 }
 
+func extract(reader opentracing.TextMapReader) (opentracing.SpanContext, error) {
+	return opentracing.GlobalTracer().Extract(opentracing.TextMap, reader)
+}
+
 // StartSpanWithRemoteParent starts and returns a Span with `operationName`, using
 // reference span as FollowsFrom
 func (t *Trace) StartSpanWithRemoteParent(ctx context.Context, operationName string, carrier tab.Carrier, opts ...interface{}) (context.Context, tab.Spanner) {
-	sc, err := opentracing.GlobalTracer().Extract(opentracing.TextMap, carrierAdapter{carrier: carrier})
+	sc, err := extract(&carrierAdapter{carrier: carrier})
 	if err != nil {
 		return t.StartSpan(ctx, operationName)
 	}
@@ -83,9 +88,13 @@ func (s *Span) Logger() tab.Logger {
 	return &tab.SpanLogger{Span: s}
 }
 
+func inject(s *Span, writer opentracing.TextMapWriter) error {
+	return opentracing.GlobalTracer().Inject(s.span.Context(), opentracing.TextMap, writer)
+}
+
 // Inject span context into carrier
 func (s *Span) Inject(carrier tab.Carrier) error {
-	return opentracing.GlobalTracer().Inject(s.span.Context(), opentracing.TextMap, &carrierAdapter{carrier: carrier})
+	return inject(s, &carrierAdapter{ carrier})
 }
 
 // InternalSpan returns the real implementation of the Span
