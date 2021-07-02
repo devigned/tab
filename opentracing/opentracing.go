@@ -40,7 +40,7 @@ func extract(reader opentracing.TextMapReader) (opentracing.SpanContext, error) 
 // StartSpanWithRemoteParent starts and returns a Span with `operationName`, using
 // reference span as FollowsFrom
 func (t *Trace) StartSpanWithRemoteParent(ctx context.Context, operationName string, carrier tab.Carrier, opts ...interface{}) (context.Context, tab.Spanner) {
-	sc, err := extract(&carrierAdapter{carrier: carrier})
+	sc, err := extract(&carrierAdapter{carrier})
 	if err != nil {
 		return t.StartSpan(ctx, operationName)
 	}
@@ -94,7 +94,7 @@ func inject(s *Span, writer opentracing.TextMapWriter) error {
 
 // Inject span context into carrier
 func (s *Span) Inject(carrier tab.Carrier) error {
-	return inject(s, &carrierAdapter{ carrier})
+	return inject(s, &carrierAdapter{carrier})
 }
 
 // InternalSpan returns the real implementation of the Span
