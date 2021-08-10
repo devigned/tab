@@ -3,6 +3,7 @@ package opencensus
 import (
 	"context"
 	"encoding/base64"
+
 	"github.com/devigned/tab"
 	oct "go.opencensus.io/trace"
 	"go.opencensus.io/trace/propagation"
@@ -96,7 +97,7 @@ func (s *Span) End() {
 
 // Logger returns a trace.Logger for the span
 func (s *Span) Logger() tab.Logger {
-	return &tab.SpanLogger{Span: s}
+	return &AnnotationLogger{Span: s}
 }
 
 // Inject propagation key onto the carrier
@@ -136,3 +137,31 @@ func attributesToOCAttributes(attributes ...tab.Attribute) []oct.Attribute {
 	}
 	return ocAttributes
 }
+
+type AnnotationLogger struct {
+	Span *Span
+}
+
+func (a *AnnotationLogger) Info(msg string, attributes ...tab.Attribute) {
+	a.logToAnnotation("error", msg, attributes...)
+}
+
+func (a *AnnotationLogger) Error(err error, attributes ...tab.Attribute) {
+	a.Span.AddAttributes(tab.BoolAttribute("error", true))
+	a.logToAnnotation("error", err.Error(), attributes...)
+}
+
+func (a *AnnotationLogger) Fatal(msg string, attributes ...tab.Attribute) {
+	a.Span.AddAttributes(tab.BoolAttribute("error", true))
+	a.logToAnnotation("fatal", msg, attributes...)
+}
+
+func (a *AnnotationLogger) Debug(msg string, attributes ...tab.Attribute) {
+	a.logToAnnotation("debug", msg, attributes...)
+}
+
+func (a *AnnotationLogger) logToAnnotation(level string, msg string, attributes ...tab.Attribute) {
+	attrs := append(attributes, tab.StringAttribute("level", level))
+	a.Span.span.Annotate(attributesToOCAttributes(attrs...), msg)
+}
+
