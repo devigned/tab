@@ -143,7 +143,7 @@ type AnnotationLogger struct {
 }
 
 func (a *AnnotationLogger) Info(msg string, attributes ...tab.Attribute) {
-	a.logToAnnotation("error", msg, attributes...)
+	a.logToAnnotation("info", msg, attributes...)
 }
 
 func (a *AnnotationLogger) Error(err error, attributes ...tab.Attribute) {
