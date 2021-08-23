@@ -20,4 +20,5 @@ func TestKVLogger_Info(t *testing.T) {
 	finishedSpan := tracer.FinishedSpans()[0]
 	logs := finishedSpan.Logs()
 	assert.Len(t, logs,2)
+	assert.Len(t, logs[0].Fields,2)
 }

@@ -153,12 +153,14 @@ func (a *KVLogger) Debug(msg string, attributes ...tab.Attribute) {
 }
 
 func (a *KVLogger) logToAnnotation(level string, msg string, attributes ...tab.Attribute) {
-	attrs := append(attributes, tab.StringAttribute("level", level))
+	attrs := append(attributes,
+		tab.StringAttribute("level", level),
+		tab.StringAttribute("msg", msg),
+	)
 	var kvs []interface{}
 	for _, a := range attrs {
 		kvs = append(kvs, a.Key, a.Value)
 	}
-	kvs = append(kvs, "msg", msg, "level", level)
 	a.Span.span.LogKV(kvs...)
 }
 
