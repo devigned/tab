@@ -85,7 +85,7 @@ func (s *Span) End() {
 
 // Logger returns a trace.Logger for the span
 func (s *Span) Logger() tab.Logger {
-	return &tab.SpanLogger{Span: s}
+	return &KVLogger{Span: s}
 }
 
 func inject(s *Span, writer opentracing.TextMapWriter) error {
@@ -128,3 +128,39 @@ func toOTOption(opts ...interface{}) []opentracing.StartSpanOption {
 	}
 	return ocStartOptions
 }
+
+
+type KVLogger struct {
+	Span *Span
+}
+
+func (a *KVLogger) Info(msg string, attributes ...tab.Attribute) {
+	a.logToAnnotation("info", msg, attributes...)
+}
+
+func (a *KVLogger) Error(err error, attributes ...tab.Attribute) {
+	a.Span.AddAttributes(tab.BoolAttribute("error", true))
+	a.logToAnnotation("error", err.Error(), attributes...)
+}
+
+func (a *KVLogger) Fatal(msg string, attributes ...tab.Attribute) {
+	a.Span.AddAttributes(tab.BoolAttribute("error", true))
+	a.logToAnnotation("fatal", msg, attributes...)
+}
+
+func (a *KVLogger) Debug(msg string, attributes ...tab.Attribute) {
+	a.logToAnnotation("debug", msg, attributes...)
+}
+
+func (a *KVLogger) logToAnnotation(level string, msg string, attributes ...tab.Attribute) {
+	attrs := append(attributes,
+		tab.StringAttribute("level", level),
+		tab.StringAttribute("msg", msg),
+	)
+	var kvs []interface{}
+	for _, a := range attrs {
+		kvs = append(kvs, a.Key, a.Value)
+	}
+	a.Span.span.LogKV(kvs...)
+}
+
