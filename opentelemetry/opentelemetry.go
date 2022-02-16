@@ -74,8 +74,10 @@ func (t *Trace) StartSpan(ctx context.Context, operationName string, opts ...int
 }
 
 func extract(reader propagation.TextMapCarrier) (trace.SpanContext, error) {
-	// TODO
-	return trace.SpanContext{}, nil
+	ctx := context.Background()
+	ctx = otel.GetTextMapPropagator().Extract(ctx, reader)
+	span := trace.SpanFromContext(ctx)
+	return span.SpanContext(), nil
 }
 
 // StartSpanWithRemoteParent starts and returns a Span with `operationName`, using
