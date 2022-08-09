@@ -29,6 +29,7 @@ import (
 	"github.com/devigned/tab"
 	_ "github.com/devigned/tab/opencensus" // use OpenCensus
 	// _ "github.com/devigned/tab/opentracing" // use OpenTracing
+	// _ "github.com/devigned/tab/opentelemetry" // use Opentelemetry
 )
 
 func main() {
